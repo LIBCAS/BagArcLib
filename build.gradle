@@ -1,0 +1,48 @@
+apply plugin: 'java'
+
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+// NetBeans will automatically add "run" and "debug" tasks relying on the
+// "mainClass" property. You may however define the property prior executing
+// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
+//
+// Note however, that you may define your own "run" and "debug" task if you
+// prefer. In this case NetBeans will not add these tasks but you may rely on
+// your own implementation.
+if (!hasProperty('mainClass')) {
+    ext.mainClass = 'GUI.MainFrame'
+}
+
+repositories {
+    mavenLocal()
+    // maven { url "http://jcenter.bintray.com" }
+    // You may define additional repositories, or even remove "mavenCentral()".
+    // Read more about repositories here:
+    //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:repositories
+}
+
+dependencies {
+    // TODO: Add dependencies here ...
+    // You can read more about how to add dependency here:
+    //   http://www.gradle.org/docs/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies
+    compile group: 'junit', name: 'junit', version: '3.8'
+    compile group: 'org.tukaani', name: 'xz', version: '1.0'
+    compile group: 'org.apache.commons', name: 'commons-compress', version: '1.4.1'
+    compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    compile group: 'gov.loc', name: 'bagit', version: '5.2.0'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+    compile group: 'com.joyent.util', name: 'fast-md5', version: '2.7.1'
+    compile group: 'net.lingala.zip4j', name: 'zip4j', version: '1.3.2'
+    
+}
+
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'GUI.MainFrame'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
