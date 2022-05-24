@@ -16,6 +16,11 @@ import org.w3c.dom.Document;
 import utils.XMLUtils;
 import org.w3c.dom.Element;
 
+/**
+ *
+ * @author Gabriela Melingerová
+ */
+
 public class CheckIt {
     
     private static String log = "";
@@ -35,6 +40,7 @@ public class CheckIt {
     private static boolean ndkPages = false;
     private static boolean pages = false;
     private static boolean oldPages = false;
+    private static boolean occFolder = false;
     
     // counter of the files in the folder alto, amdsec etc.
     private static int altoCounter, amdsecCounter, mastercopyCounter, txtCounter, usercopyCounter;
@@ -126,7 +132,7 @@ public class CheckIt {
                 md5Map.clear();
                 altoCounter = amdsecCounter = mastercopyCounter = txtCounter = usercopyCounter = 0;
                 position = 0;
-                ndkPages = pages = oldPages = false;
+                ndkPages = pages = oldPages = occFolder = false;
                 nameOfFolderUnderArchive = "";
                 
                 doc.insertString(doc.getLength(), "###########################################################################################################\n\n", styleCheck);
@@ -147,25 +153,63 @@ public class CheckIt {
                 // mix of ndkpages and pages in AUDIT - WRONG
                 String text = "";
                 if (ndkPages && pages && !oldPages) {
-                    text = "Složka obsahuje NDK strany i normalní strany.\n\n";
+                    text = "Složka obsahuje NDK strany i normalní strany.\n";
                     doc.insertString(position, text, styleError);
                 }
                 else {
                     // it contains only ndkpages
                     if (ndkPages) {
-                        text = "Složka obsahuje jen NDK strany.\n\n";
+                        text = "Složka obsahuje jen NDK strany.\n";
                     }
                     // it contains only pages
                     if (pages) {
-                        text = "Složka obsahuje jen strany.\n\n";
+                        text = "Složka obsahuje jen strany.\n";
                     }
                     if (oldPages) {
-                        text = "Jedná se o staré tisky.\n\n";
+                        text = "Jedná se o staré tisky.\n";
+                        File directory = new File(subfolderPath + "/" + "ICC_profil");
+                         if (directory.exists()) {
+                             text += "Obsahuje složku ICC_profil.\n";
+                             occFolder = true;
+                         }
+                         else {
+                             text += "Nebsahuje složku ICC_profil.\n";
+                         }
                     }
+                }
+                
+                // workflow_information.xml
+                File workflow = new File(subfolderPath + "/" + "workflow_information.xml");
+                if (workflow.exists()) {
+                    text += "Složka obsahuje soubor workflow_information.xml\n\n";
+                    doc.insertString(position, text, styleCheck); 
+                }
+                else {
+                    text += "Složka neobsahuje soubor workflow_information.xml\n\n";
                     doc.insertString(position, text, styleCheck);
                 }
+                
                 if (textWasAdded == true) {
-                   doc.insertString(position + text.length(), "************************ AUDIT ************************\n\n", styleInfoFile);
+                    doc.insertString(position + text.length(), "************************ AUDIT ************************\n\n", styleInfoFile);
+                }
+                else {
+                    doc.insertString(doc.getLength(), "************************ AUDIT ************************\n\n", styleInfoFile);
+                    infoMainFolder("AUDIT");
+                }
+                
+                // ICC_profile
+                if (oldPages) {
+                    position = doc.getLength();
+                    if (occFolder) {
+                        textWasAdded = checkFolder(subfolderPath + "/" + "ICC_profil", "", "", 0);
+                        if (textWasAdded == true) {
+                            doc.insertString(position, "************************ ICC_profil ************************\n\n", styleInfoFile); 
+                        }
+                        else {
+                            doc.insertString(doc.getLength(), "************************ ICC_profil ************************\n\n", styleInfoFile); 
+                            infoMainFolder("ICC_profil");
+                        }
+                    }
                 }
                 
                 // DESCRIPTION
@@ -174,12 +218,20 @@ public class CheckIt {
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ DESCRIPTION ************************\n\n", styleInfoFile); 
                 }
+                else {
+                    doc.insertString(doc.getLength(), "************************ DESCRIPTION ************************\n\n", styleInfoFile); 
+                    infoMainFolder("DESCRIPTION");
+                }
                 
                 // FOXML
                 position = doc.getLength();
                 textWasAdded = checkFolder(subfolderPath + "/" + "FOXML", "foxml", "xml", 0);
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ FOXML ************************\n\n", styleInfoFile); 
+                }
+                else {
+                    doc.insertString(doc.getLength(), "************************ FOXML ************************\n\n", styleInfoFile);  
+                    infoMainFolder("FOXML");
                 }
                 
                 // FULL
@@ -188,12 +240,20 @@ public class CheckIt {
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ FULL ************************\n\n", styleInfoFile); 
                 }
+                else {
+                    doc.insertString(doc.getLength(), "************************ FULL ************************\n\n", styleInfoFile); 
+                    infoMainFolder("FULL");
+                }
                 
                 // PREVIEW
                 position = doc.getLength();
                 textWasAdded = checkFolder(subfolderPath + "/" + "PREVIEW", "preview", "jpg", 0);
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ PREVIEW ************************\n\n", styleInfoFile); 
+                }
+                else {
+                    doc.insertString(doc.getLength(), "************************ PREVIEW ************************\n\n", styleInfoFile);  
+                    infoMainFolder("PREVIEW");
                 }
                 
                 // RAW
@@ -202,12 +262,20 @@ public class CheckIt {
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ RAW ************************\n\n", styleInfoFile); 
                 }
+                else {
+                    doc.insertString(doc.getLength(), "************************ RAW ************************\n\n", styleInfoFile);
+                    infoMainFolder("RAW");
+                }
                 
                 // RAW_MIX
                 position = doc.getLength();
                 textWasAdded = checkFolder(subfolderPath + "/" + "RAW_MIX", "raw_mix", "xml", 1);
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ RAW_MIX ************************\n\n", styleInfoFile); 
+                }
+                else {
+                    doc.insertString(doc.getLength(), "************************ RAW_MIX ************************\n\n", styleInfoFile); 
+                    infoMainFolder("RAW_MIX");
                 }
                 
                 // RELS-EXT
@@ -216,12 +284,20 @@ public class CheckIt {
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ RELS-EXT ************************\n\n", styleInfoFile); 
                 }
+                else {
+                    doc.insertString(doc.getLength(), "************************ RELS-EXT ************************\n\n", styleInfoFile); 
+                    infoMainFolder("RELS-EXT");
+                }
                 
                 // THUMBNAIL
                 position = doc.getLength();
                 textWasAdded = checkFolder(subfolderPath + "/" + "THUMBNAIL", "thumbnail", "jpg", 0);
                 if (textWasAdded == true) {
                    doc.insertString(position, "************************ THUMBNAIL ************************\n\n", styleInfoFile); 
+                }
+                else {
+                    doc.insertString(doc.getLength(), "************************ THUMBNAIL ************************\n\n", styleInfoFile); 
+                    infoMainFolder("THUMBNAIL");
                 }
                 
                 // Original_Tif_LZW/Original_Tif/Original_JPG/Original_JP2/Original_PDF
@@ -335,12 +411,47 @@ public class CheckIt {
         }
         
         File [] files = directory.listFiles();
+       
+        // ICC_profil is empty - ERROR
+        if (occFolder && files.length == 0) {
+            doc.insertString(doc.getLength(), "ICC_profil:\n", styleError);
+            doc.insertString(doc.getLength(), "- složka je prázdná.\n\n", styleNeutral);
+            textWasAdded = true;
+        } 
+        
         for (File file : files) {
             if (file.isDirectory()) {
                 continue;
             }
             
             fileCount++;
+            
+            // checking ICC_profil for oldprints
+            if (occFolder && extension.equals("")) {
+                String fullFileName = file.getName();
+                String extensionFile = utils.Utils.getExtension(fullFileName);
+                extensionFile = extensionFile.toLowerCase();
+                
+                if (extensionFile.matches("icc|tif|jpg|txt")) {
+                    continue;
+                }
+                else {
+                    //error
+                    doc.insertString(doc.getLength(), "KONCOVKA:", styleError);
+                    doc.insertString(doc.getLength(), "\n- soubor ", styleNeutral);
+                    doc.insertString(doc.getLength(), fullFileName, styleFile);
+                    doc.insertString(doc.getLength(), "\nve složce ", styleNeutral);
+                    doc.insertString(doc.getLength(), folderPath, styleFolder);
+                    doc.insertString(doc.getLength(), "\nnemá koncovku '", styleNeutral);
+                    doc.insertString(doc.getLength(), "icc|tif|jpg|txt", styleFile);
+                    doc.insertString(doc.getLength(), "', má: '", styleNeutral);
+                    doc.insertString(doc.getLength(), extensionFile, styleFile);
+                    doc.insertString(doc.getLength(), "'.\n\n", styleNeutral);
+                    textWasAdded = true;
+                    continue;
+                }
+                
+            }
             
             String fullFileName = file.getName();
             String prefixFile = utils.Utils.getPrefix(fullFileName, underscore);
@@ -525,6 +636,7 @@ public class CheckIt {
                     
                     String fullFileName = file.getName();
                     String extensionFile = utils.Utils.getExtension(fullFileName);
+                    extensionFile = extensionFile.toLowerCase();
 
                     fileCounter++;
                     
@@ -1321,5 +1433,15 @@ public class CheckIt {
         doc.insertString(doc.getLength(), "\nexistuje ve složce ", styleNeutral);
         doc.insertString(doc.getLength(), folder, styleFolder);
         doc.insertString(doc.getLength(), ".\n\n", styleNeutral);
+    }
+    
+    /**
+     * Inserts the text about that the main folder doesn't have issues
+     *
+     * @param name - name of the folder ex: AUDIT, 
+     */
+    private static void infoMainFolder(String name) throws BadLocationException {
+        doc.insertString(doc.getLength(), name + ":", styleInfo);
+        doc.insertString(doc.getLength(), "\n- složka byla zkontrolována.\n\n", styleNeutral);
     }
 }
