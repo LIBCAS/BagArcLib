@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -306,6 +308,34 @@ public class Utils {
        String hash = MD5.asHex(MD5.getHash(new File(filePath)));
        return hash;
    }
+    
+    /**
+     * Returns the checksum and the path of file
+     * 
+     * @param line - line to be parse ex: 12133232434 
+     * @return List<String> which contains of the checksum and the path
+     */
+    public static List<String> getChecksumAndPath(String line) {
+        List<String> list = new ArrayList<String>();
+        char [] arr = line.toCharArray();
+        String checksum = "";
+        String path = "";
+        Boolean isItChecksum = true;
+        for (int i = 0; i < line.length(); i++) {
+            if (isItChecksum && arr[i] != ' ') {
+                checksum += arr[i];
+            }
+            if (arr[i] == ' ') {
+                isItChecksum = false;
+            }
+            if (!isItChecksum && arr[i] != ' ') {
+                path += arr[i];
+            }
+        }
+        list.add(checksum);
+        list.add(path);
+        return list;
+    }
     
     
 }

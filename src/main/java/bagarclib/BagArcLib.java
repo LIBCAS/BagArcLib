@@ -321,6 +321,12 @@ public class BagArcLib {
         }
         getChecksumsFromText(originalPath, manifestPath, dataFolderWithChildFolder);
         getChecksumsForFiles(basePath + "/" + dataFolderWithChildFolder, nameWithouArchive, manifestPath, basePath + "/");
+        
+        // for ICC_profile
+        File directory = new File(basePath + "/" + dataFolderWithChildFolder + "/" + "ICC_profil");
+        if (directory.exists()) {
+            getChecksumsForFiles(basePath + "/" + dataFolderWithChildFolder + "/" + "ICC_profil", nameWithouArchive, manifestPath, basePath + "/");
+        }
     }
     
     /**
